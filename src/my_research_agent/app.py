@@ -2,16 +2,22 @@ import streamlit as st
 import json
 import time
 import os
+import sys
+from pathlib import Path
+
+# --- NEW: PATH FIX FOR CLOUD DEPLOYMENT ---
+# This adds the 'src' directory to the system path so modules are found
+current_dir = Path(__file__).parent.parent
+sys.path.append(str(current_dir))
 
 # --- CLOUD SECURITY GATE ---
-# Improved check to prevent crashes on different environments
 if "GOOGLE_API_KEY" in st.secrets:
     os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
 if "SERPER_API_KEY" in st.secrets:
     os.environ["SERPER_API_KEY"] = st.secrets["SERPER_API_KEY"]
 
-# Imports moved after env vars are set for safety
 from datetime import datetime
+# Change this import to be relative or ensure the path fix above is active
 from my_research_agent.crew import MyResearchAgent
 
 
