@@ -21,7 +21,7 @@ charset-normalizer==3.4.7
 chromadb==1.1.1
 click==8.1.8
 coloredlogs==15.0.1
-crewai==1.9.3
+crewai[google-genai]==1.9.3
 crewai-tools==1.9.3
 cryptography==48.0.0
 decorator==5.2.1
