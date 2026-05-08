@@ -1,0 +1,26 @@
+# tasks.yaml
+market_scouting_task:
+  description: >
+    Perform a 360-degree scan for {product_concept}. 
+    Identify the top 3 competitors and their specific technical benchmarks. 
+    Look for "Proof Points" and real-world results, not just marketing mentions.
+  expected_output: >
+    A verified dataset of competitors and current market performance signals.
+  agent: data_scout
+
+economic_modeling_task:
+  description: >
+    Calculate the TAM, SAM, and SOM for {product_concept} using a bottoms-up approach. 
+    Explain exactly which segment is structurally accessible for a startup in {current_year}.
+  expected_output: >
+    Structured market sizing with a clear "Why Now" thesis.
+  agent: financial_architect
+
+investment_audit_task:
+  description: >
+    Review all findings. Identify 3-5 genuine strategic risks. 
+    For each risk, provide Likelihood, Impact, and a Mitigation Strategy. 
+    Finalize the Investment Thesis that a VC would use to defend a funding decision.
+  expected_output: >
+    A fully validated VCReadyOutput object.
+  agent: strategic_auditor
