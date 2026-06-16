@@ -49,24 +49,43 @@ def run():
         # This handles the data from your models.py
         data = result.pydantic
         
+        # Safe string conversion for heading
+        concept_title = data.product_concept if hasattr(data, 'product_concept') else data.get('product_concept', product_concept)
+        
         print("\n" + "="*60)
-        print(f"            FINAL STRATEGIC REPORT: {data.product_concept.upper()}")
+        print(f"            FINAL STRATEGIC REPORT: {str(concept_title).upper()}")
         print("="*60)
         
         print("\nTOP COMPETITOR ANALYSIS:")
-        for comp in data.top_competitors:
-            print(f"\n📍 {comp.name}")
-            print(f"   - Value Proposition: {comp.value_proposition}")
-            print(f"   - Identified Weakness: {comp.weakness}")
+        competitors = data.top_competitors if hasattr(data, 'top_competitors') else data.get('top_competitors', [])
+        for comp in competitors:
+            # Type fallback architecture: Handles dictionary or Pydantic instance natively
+            if isinstance(comp, dict):
+                comp_name = comp.get('name', 'N/A')
+                comp_val = comp.get('value_proposition', 'N/A')
+                comp_weak = comp.get('weakness', 'N/A')
+            else:
+                comp_name = getattr(comp, 'name', 'N/A')
+                comp_val = getattr(comp, 'value_proposition', 'N/A')
+                comp_weak = getattr(comp, 'weakness', 'N/A')
+
+            print(f"\n📍 {comp_name}")
+            print(f"   - Value Proposition: {comp_val}")
+            print(f"   - Identified Weakness: {comp_weak}")
             
         print(f"\n🎯 MARKET WHITE SPACE OPPORTUNITY:")
-        print(f"   {data.market_white_space}")
+        white_space = data.market_white_space if hasattr(data, 'market_white_space') else data.get('market_white_space', 'N/A')
+        print(f"   {white_space}")
         print("\n" + "="*60)
 
         # Enterprise Tooling: Permanent JSON Export
         export_filename = f"research_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(export_filename, 'w') as f:
-            json.dump(data.model_dump(), f, indent=4)
+            # Safely serialize data whether it's a raw Pydantic model or pre-parsed dict
+            if hasattr(data, 'model_dump'):
+                json.dump(data.model_dump(), f, indent=4)
+            else:
+                json.dump(data, f, indent=4)
             
         print(f"\n[✅] Success! Data exported to: {export_filename}")
         
