@@ -1,8 +1,44 @@
+import os
+import http.client
+import json
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from crewai_tools import SerperDevTool
+from crewai.tools import tool
 from my_research_agent.models import VCReadyOutput
 from langchain_google_genai import ChatGoogleGenerativeAI
+
+# 1. Custom, framework-safe native search tool
+@tool("Search the Internet")
+def native_serper_search(search_query: str) -> str:
+    """
+    Search the internet for recent news, market metrics, benchmarks, and competitor data using the Serper API.
+    """
+    api_key = os.environ.get("SERPER_API_KEY", "")
+    if not api_key:
+        return "Error: SERPER_API_KEY environment variable is not set."
+
+    try:
+        conn = http.client.HTTPSConnection("google.serper.dev")
+        payload = json.dumps({"q": search_query, "num": 10})
+        headers = {
+            'X-API-KEY': api_key,
+            'Content-Type': 'application/json'
+        }
+        conn.request("POST", "/search", payload, headers)
+        res = conn.getresponse()
+        data = res.read()
+        conn.close()
+        
+        # Parse and return structured snippets back to the agent layout
+        search_results = json.loads(data.decode("utf-8"))
+        snippets = []
+        if "organic" in search_results:
+            for item in search_results["organic"][:5]:
+                snippets.append(f"Title: {item.get('title')}\nLink: {item.get('link')}\nSnippet: {item.get('snippet')}\n---")
+        return "\n".join(snippets) if snippets else "No highly relevant organic search results found."
+    except Exception as e:
+        return f"Error executing live search engine call: {str(e)}"
+
 
 @CrewBase
 class MyResearchAgent():
@@ -22,9 +58,8 @@ class MyResearchAgent():
     def data_scout(self) -> Agent:
         return Agent(
             config=self.agents_config['data_scout'],
-            # Explicitly passing the langchain instance directly to the search tool config
-            # overrides CrewAI's default LiteLLM parser path completely!
-            tools=[SerperDevTool(llm=self.llm_instance)],
+            # Bypassed CrewAI's built-in wrapper completely to eliminate LiteLLM hooks
+            tools=[native_serper_search],
             llm=self.llm_instance,
             verbose=True,
             allow_delegation=False
