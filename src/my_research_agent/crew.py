@@ -1,6 +1,5 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from crewai.llm import LLM
 from crewai_tools import SerperDevTool
 from my_research_agent.models import VCReadyOutput
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -13,25 +12,19 @@ class MyResearchAgent():
     tasks_config = 'config/tasks.yaml'
 
     def __init__(self) -> None:
-        # 1. Main Agent Core LLM: Clean LangChain implementation
+        # One clean, explicit model instance used globally across the entire pipeline
         self.llm_instance = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
             temperature=0.5
-        )
-        
-        # 2. Tool-Isolated Context LLM: Clean CrewAI wrapper context
-        # This completely satisfies the internal LiteLLM parser used by SerperDevTool
-        self.tool_llm = LLM(
-            model="gemini/gemini-2.5-flash",
-            temperature=0.3
         )
 
     @agent
     def data_scout(self) -> Agent:
         return Agent(
             config=self.agents_config['data_scout'],
-            # Explicitly pass the separate tool_llm straight to the tool configuration
-            tools=[SerperDevTool(llm=self.tool_llm)],
+            # Explicitly passing the langchain instance directly to the search tool config
+            # overrides CrewAI's default LiteLLM parser path completely!
+            tools=[SerperDevTool(llm=self.llm_instance)],
             llm=self.llm_instance,
             verbose=True,
             allow_delegation=False
