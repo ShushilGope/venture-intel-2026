@@ -7,7 +7,7 @@ from crewai.tools import tool
 from my_research_agent.models import VCReadyOutput
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-# 1. Custom, framework-safe native search tool
+# Framework-safe native search tool to completely bypass built-in tool abstractions
 @tool("Search the Internet")
 def native_serper_search(search_query: str) -> str:
     """
@@ -29,7 +29,6 @@ def native_serper_search(search_query: str) -> str:
         data = res.read()
         conn.close()
         
-        # Parse and return structured snippets back to the agent layout
         search_results = json.loads(data.decode("utf-8"))
         snippets = []
         if "organic" in search_results:
@@ -48,9 +47,9 @@ class MyResearchAgent():
     tasks_config = 'config/tasks.yaml'
 
     def __init__(self) -> None:
-        # One clean, explicit model instance used globally across the entire pipeline
+        # The key prefix format that satisfies both LiteLLM and LangChain 4.2.2
         self.llm_instance = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
+            model="gemini/gemini-2.5-flash",
             temperature=0.5
         )
 
@@ -58,7 +57,6 @@ class MyResearchAgent():
     def data_scout(self) -> Agent:
         return Agent(
             config=self.agents_config['data_scout'],
-            # Bypassed CrewAI's built-in wrapper completely to eliminate LiteLLM hooks
             tools=[native_serper_search],
             llm=self.llm_instance,
             verbose=True,
