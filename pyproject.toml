@@ -5,10 +5,9 @@ description = "my_research_agent using crewAI"
 authors = [{ name = "Your Name", email = "you@example.com" }]
 requires-python = ">=3.10,<3.14"
 dependencies = [
-    "crewai[tools]==1.9.3",
-    "crewai[google-genai]==1.9.3",
+    "crewai==1.9.3",
     "crewai-tools==1.9.3",
-    "langchain-google-genai==4.2.2",
+    "langchain-google-genai>=1.0.0,<3.0.0",
     "python-dotenv==1.1.1",
     "streamlit==1.57.0",
     "pydantic==2.11.10"
