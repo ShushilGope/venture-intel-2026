@@ -4,10 +4,10 @@ import json
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.tools import tool
+from crewai.llm import LLM
 from my_research_agent.models import VCReadyOutput
-from langchain_google_genai import ChatGoogleGenerativeAI
 
-# Framework-safe native search tool to completely bypass built-in tool abstractions
+# Clean, framework-safe native custom search tool
 @tool("Search the Internet")
 def native_serper_search(search_query: str) -> str:
     """
@@ -47,8 +47,9 @@ class MyResearchAgent():
     tasks_config = 'config/tasks.yaml'
 
     def __init__(self) -> None:
-        # The key prefix format that satisfies both LiteLLM and LangChain 4.2.2
-        self.llm_instance = ChatGoogleGenerativeAI(
+        # Using CrewAI's native LLM configuration explicitly 
+        # This forces clean LiteLLM formatting natively without hidden LangChain transformations!
+        self.llm_instance = LLM(
             model="gemini/gemini-2.5-flash",
             temperature=0.5
         )
